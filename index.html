@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>sahibinden.com Havasında Vasıta</title>
+    <style>
+        /* Sahibinden Renk Paleti ve Genel Ayarlar */
+        :root {
+            --sh-blue: #3b5998;
+            --sh-dark: #232f3e;
+            --sh-yellow: #fff300;
+            --sh-bg: #f8f9fa;
+            --sh-text: #333;
+            --sh-price: #df1f1f;
+            --sh-link: #003399;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--sh-bg);
+            color: var(--sh-text);
+            padding-bottom: 60px; /* Mobil alt menü için alan */
+        }
+
+        /* Üst Bar (Header) - Mobil Uyumlu */
+        header {
+            background-color: var(--sh-dark);
+            color: white;
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: var(--sh-yellow);
+        }
+
+        .sub-header {
+            background-color: var(--sh-blue);
+            color: white;
+            padding: 8px 15px;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+        }
+
+        /* Ana Konteyner */
+        .main-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+
+        /* Kategori Bilgisi */
+        .category-path {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 10px;
+            padding: 5px;
+        }
+
+        /* İlan Kartı (Sahibinden Mobil Liste Tarzı) */
+        .listing-item {
+            background: white;
+            border-bottom: 1px solid #e4e4e4;
+            display: flex;
+            padding: 10px;
+            gap: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .listing-item:hover {
+            background-color: #f1f5f9;
+        }
+
+        .img-container {
+            width: 110px;
+            height: 85px;
+            flex-shrink: 0;
+            border-radius: 4px;
+            overflow: hidden;
+            background-color: #eee;
+            position: relative;
+        }
+
+        .img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .item-details {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .item-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--sh-link);
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .item-specs {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .item-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 5px;
+        }
+
+        .item-price {
+            font-size: 15px;
+            color: var(--sh-price);
+            font-weight: bold;
+        }
+
+        .item-location {
+            font-size: 11px;
+            color: #888;
+        }
+
+        /* DETAY SAYFASI MODALI (Açılır Pencere) */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: flex-end; /* Mobilde alttan açılsın */
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+            overflow-y: auto;
+            padding: 20px;
+            position: relative;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 28px;
+            color: #666;
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+
+        .modal-img {
+            width: 100%;
+            max-height: 250px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 15px;
+            color: var(--sh-dark);
+        }
+
+        .modal-price {
+            font-size: 24px;
+            color: var(--sh-price);
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        /* Sahibinden Bilgi Tablosu */
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .info-table tr {
+            border-bottom: 1px solid #eee;
+        }
+
+        .info-table td {
+            padding: 10px 5px;
+            font-size: 14px;
+        }
+
+        .info-table td.label {
+            font-weight: bold;
+            color: #555;
+            width: 40%;
+        }
+
+        .info-table td.value {
+            color: #222;
+        }
+
+        .status-box {
+            background: #fff9db;
+            border: 1px solid #ffe066;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        /* Mobil Alt Sabit Bar */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: white;
+            border-top: 1px solid #ddd;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 99;
+        }
+
+        .nav-item {
+            text-align: center;
+            font-size: 11px;
+            color: #666;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .nav-item.active {
+            color: var(--sh-blue);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sahibinden Tarzı Üst Bar -->
+    <header>
+        <a href="#" class="logo">sahibinden<span>.com</span></a>
+        <div style="font-size: 13px; color: var(--sh-yellow);">Oto Galeri</div>
+    </header>
+
+    <div class="sub-header">
+        <span>Vasıta / Otomobil</span>
+        <span>Filtrele (3)</span>
+    </div>
+
+    <!-- Ana Gövde -->
+    <div class="main-container">
+        <div class="category-path">Babanız İçin Seçilen Canlı İlanlar</div>
+
+        <!-- İlan Listesi Alanı -->
+        <div id="listings-wrapper">
+            <!-- JavaScript burayı canlı resimlerle dolduracak -->
+        </div>
+    </div>
+
+    <!-- DETAY GÖRÜNTÜLEME PENCERESİ (MODAL) -->
+    <div id="detailsModal" class="modal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="close-btn" onclick="toggleModal(false)">&times;</button>
+            
+            <img id="m-img" class="modal-img" src="" alt="Araba">
+            <h2 id="m-title" class="modal-title"></h2>
+            <div id="m-price" class="modal-price"></div>
+
+            <!-- Teknik Özellikler Tablosu (Birebir Sahibinden Formatı) -->
+            <table class="info-table">
+                <tr>
+                    <td class="label">Marka</td>
+                    <td id="m-brand" class="value"></td>
+                </tr>
+                <tr>
+                    <td class="label">Seri / Model</td>
+                    <td id="m-model" class="value"></td>
+                </tr>
+                <tr>
+                    <td class="label">Yıl</td>
+                    <td id="m-year" class="value"></td>
+                </tr>
+                <tr>
+                    <td class="label">Kilometre</td>
+                    <td id="m-km" class="value"></td>
+                </tr>
+                <tr>
+                    <td class="label">Renk</td>
+                    <td id="m-color" class="value"></td>
+                </tr>
+                <tr>
+                    <td class="label">İl / İlçe</td>
+                    <td id="m-location" class="value"></td>
+                </tr>
+            </table>
+
+            <h3 style="margin-top: 15px; font-size: 15px;">Açıklama ve Durumu</h3>
+            <div id="m-status" class="status-box"></div>
+        </div>
+    </div>
+
+    <!-- Mobil Alt Menü -->
+    <div class="bottom-nav">
+        <a href="#" class="nav-item active">🏠<br>Vitrin</a>
+        <a href="#" class="nav-item" onclick="alert('Babanın Favori İlanları Yakında!')">⭐<br>Favorilerim</a>
+        <a href="#" class="nav-item" onclick="alert('Arama Sayfası')">🔍<br>Ara</a>
+    </div>
+
+    <script>
+        // CANLI ARABA VERİTABANI (Gerçek Unsplash Araba Fotoğrafları Entegre Edildi)
+        const liveCars = [
+            {
+                id: 101,
+                title: "Sahibinden Tertemiz E60 M Paket - Değişensiz Makine",
+                brand: "BMW",
+                model: "5 Serisi (520d E60)",
+                year: 2009,
+                km: "245.000 km",
+                price: 985000,
+                color: "Metalik Siyah",
+                location: "İstanbul / Kadıköy",
+                status: "Aracın motoru yürüyeni kusursuzdur. Şanzımanda en ufak kaçırma vuruntu yoktur. Ağır bakımları yeni yapılmıştır. Sadece sağ iki kapıda yüzeysel çizik boyası vardır. Tramer önemsiz 4.000 TL.",
+                image: "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=500&q=80" // BMW Temsili Canlı Görsel
+            },
+            {
+                id: 102,
+                title: "Doktordan Az Kullanılmış C200 d AMG - Hatasız",
+                brand: "Mercedes-Benz",
+                model: "C Serisi (C200 d AMG)",
+                year: 2020,
+                km: "42.000 km",
+                price: 2450000,
+                color: "Kutup Beyazı",
+                location: "Ankara / Çankaya",
+                status: "İlk sahibinden, tamamen yetkili servis bakımlı. İçinde sigara içilmemiştir. Nokta hata, boya, tramer kesinlikle yoktur. Yedek anahtarı ve kitapçıkları mevcuttur.",
+                image: "https://images.unsplash.com/photo-1617531653332-bd46c24f2068?auto=format&fit=crop&w=500&q=80" // Mercedes Temsili Canlı Görsel
+            },
+            {
+                id: 103,
+                title: "İlk Sahibinden Yakıt Cimrisi Canlı Corolla Touch",
+                brand: "Toyota",
+                model: "Corolla (1.6 Touch)",
+                year: 2021,
+                km: "61.000 km",
+                price: 1140000,
+                color: "Gümüş Gri",
+                location: "İzmir / Bornova",
+                status: "Ev alacağım için satılıktır. Sıfır ayarında, dosta gidecek araç. Sadece sol arka çamurlukta sürtmeden dolayı lokal boya vardır. Harici hatasızdır. Muayenesi yeni yapıldı.",
+                image: "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?auto=format&fit=crop&w=500&q=80" // Toyota Temsili Canlı Görsel
+            }
+        ];
+
+        // İlanları Ekrana Basma Fonksiyonu
+        function renderListings() {
+            const wrapper = document.getElementById("listings-wrapper");
+            wrapper.innerHTML = "";
+
+            liveCars.forEach(car => {
+                const item = document.createElement("div");
+                item.className = "listing-item";
+                item.onclick = () => openDetails(car);
+
+                item.innerHTML = `
+                    <div class="img-container">
+                        <img src="${car.image}" alt="${car.title}">
+                    </div>
+                    <div class="item-details">
+                        <div class="item-title">${car.title}</div>
+                        <div class="item-specs">${car.year} | ${car.km} | ${car.color}</div>
+                        <div class="item-bottom">
+                            <span class="item-price">${car.price.toLocaleString('tr-TR')} TL</span>
+                            <span class="item-location">${car.location.split(" / ")[0]}</span>
+                        </div>
+                    </div>
+                `;
+                wrapper.appendChild(item);
+            });
+        }
+
+        // Detay Sayfasını (Modal) Açma Fonksiyonu
+        function openDetails(car) {
+            document.getElementById("m-img").src = car.image;
+            document.getElementById("m-title").innerText = car.title;
+            document.getElementById("m-price").innerText = car.price.toLocaleString('tr-TR') + " TL";
+            document.getElementById("m-brand").innerText = car.brand;
+            document.getElementById("m-model").innerText = car.model;
+            document.getElementById("m-year").innerText = car.year;
+            document.getElementById("m-km").innerText = car.km;
+            document.getElementById("m-color").innerText = car.color;
+            document.getElementById("m-location").innerText = car.location;
+            document.getElementById("m-status").innerText = car.status;
+
+            toggleModal(true);
+        }
+
+        function toggleModal(show) {
+            const modal = document.getElementById("detailsModal");
+            modal.style.display = show ? "flex" : "none";
+        }
+
+        function closeModal(e) {
+            if(e.target.id === "detailsModal") toggleModal(false);
+        }
+
+        // Uygulama yüklenince ilanları getir
+        window.onload = renderListings;
+    </script>
+</body>
+</html>
